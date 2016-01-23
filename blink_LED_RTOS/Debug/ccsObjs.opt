@@ -1,0 +1,1 @@
+"../TMS320F28035.cmd" "./main.obj" "./source/DSP2803x_CodeStartBranch.obj" "./source/DSP2803x_CpuTimers.obj" "./source/DSP2803x_GlobalVariableDefs.obj" "./source/DSP2803x_SysCtrl.obj" "./source/DSP2803x_usDelay.obj" "../DSP2803x_Headers_BIOS.cmd" -l"configPkg/linker.cmd" -l"libc.a" 
