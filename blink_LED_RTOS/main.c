@@ -133,8 +133,6 @@ void ledClockToggle(void){
 //---------------------------------------------------------------------------
 void ledToggle(void)
 {
-	while(1){
-		Semaphore_pend(ledSemaphore, BIOS_WAIT_FOREVER);
 
 		/* LED1 = GPIO9
 		 * LED2 = GPIO11
@@ -144,6 +142,8 @@ void ledToggle(void)
 		case 0:
 			// do stuff
 			GpioDataRegs.GPADAT.bit.GPIO9 	= 1;
+			GpioDataRegs.GPADAT.bit.GPIO11 	= 0;
+			GpioDataRegs.GPBDAT.bit.GPIO34 	= 0;
 			GpioDataRegs.GPBDAT.bit.GPIO41 	= 0;
 
 			ledState = 1;
@@ -151,24 +151,30 @@ void ledToggle(void)
 		case 1:
 			GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
 			GpioDataRegs.GPADAT.bit.GPIO11 	= 1;
+			GpioDataRegs.GPBDAT.bit.GPIO34 	= 0;
+			GpioDataRegs.GPBDAT.bit.GPIO41 	= 0;
 
 			ledState = 2;
 			break;
 		case 2:
 			// do stuff
+			GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
 			GpioDataRegs.GPADAT.bit.GPIO11 	= 0;
 			GpioDataRegs.GPBDAT.bit.GPIO34 	= 1;
+			GpioDataRegs.GPBDAT.bit.GPIO41 	= 0;
 			ledState = 3;
 			break;
 		case 3:
 			// do stuff
+			GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
+			GpioDataRegs.GPADAT.bit.GPIO11 	= 0;
 			GpioDataRegs.GPBDAT.bit.GPIO34 	= 0;
 			GpioDataRegs.GPBDAT.bit.GPIO41 	= 1;
 			ledState = 0;
 			break;
 		}
-	}
 }
+
 
 void buttonPress(void){
 	char state;
@@ -177,15 +183,18 @@ void buttonPress(void){
 
 	if( state == 1 ){
 		// Button is held down
-		Task_setPri(ledTask, -1);				// disable LED toggle task
+		//Task_setPri(ledTask, -1);				// disable LED toggle task
 
 		GpioDataRegs.GPADAT.bit.GPIO9 	= 1;
 		GpioDataRegs.GPADAT.bit.GPIO11 	= 1;
 		GpioDataRegs.GPBDAT.bit.GPIO34 	= 1;
 	} else if( state == 0 ){
 		// Button is released
-		Task_setPri(ledTask, 1);				// Re-enable LED toggle task
+		//Task_setPri(ledTask, 1);				// Re-enable LED toggle task
+		// do nothing
+		GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
 	}
 
 }
+
 
