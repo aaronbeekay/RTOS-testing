@@ -34,6 +34,9 @@
 #include <xdc/runtime/Log.h>				//for Log_info() calls when UIA is added
 #include <xdc/cfg/global.h> 				//header file for statically defined objects/handles
 
+#include <ti/uia/events/UIAEvt.h>			//for processing runtime logs
+#include <ti/uia/events/UIAErr.h>
+
 
 //-----------------------------------------
 // ControlSuite Header Files
@@ -133,46 +136,53 @@ void ledClockToggle(void){
 //---------------------------------------------------------------------------
 void ledToggle(void)
 {
+	while(1){
+		Semaphore_pend(ledSemaphore, BIOS_WAIT_FOREVER);
 
-		/* LED1 = GPIO9
-		 * LED2 = GPIO11
-		 * LED3 = GPIO34
-		 */
+			/* LED1 = GPIO9
+			 * LED2 = GPIO11
+			 * LED3 = GPIO34
+			 */
 		switch(ledState){
-		case 0:
-			// do stuff
-			GpioDataRegs.GPADAT.bit.GPIO9 	= 1;
-			GpioDataRegs.GPADAT.bit.GPIO11 	= 0;
-			GpioDataRegs.GPBDAT.bit.GPIO34 	= 0;
-			GpioDataRegs.GPBDAT.bit.GPIO41 	= 0;
+			case 0:
+				// do stuff
 
-			ledState = 1;
-			break;
-		case 1:
-			GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
-			GpioDataRegs.GPADAT.bit.GPIO11 	= 1;
-			GpioDataRegs.GPBDAT.bit.GPIO34 	= 0;
-			GpioDataRegs.GPBDAT.bit.GPIO41 	= 0;
+				GpioDataRegs.GPASET.bit.GPIO9 		= 1;
+				GpioDataRegs.GPACLEAR.bit.GPIO11 	= 1;
+				GpioDataRegs.GPBCLEAR.bit.GPIO34 	= 1;
+				GpioDataRegs.GPBCLEAR.bit.GPIO41 	= 1;
 
-			ledState = 2;
-			break;
-		case 2:
-			// do stuff
-			GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
-			GpioDataRegs.GPADAT.bit.GPIO11 	= 0;
-			GpioDataRegs.GPBDAT.bit.GPIO34 	= 1;
-			GpioDataRegs.GPBDAT.bit.GPIO41 	= 0;
-			ledState = 3;
-			break;
-		case 3:
-			// do stuff
-			GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
-			GpioDataRegs.GPADAT.bit.GPIO11 	= 0;
-			GpioDataRegs.GPBDAT.bit.GPIO34 	= 0;
-			GpioDataRegs.GPBDAT.bit.GPIO41 	= 1;
-			ledState = 0;
-			break;
-		}
+				ledState = 1;
+				break;
+			case 1:
+
+				GpioDataRegs.GPACLEAR.bit.GPIO9 	= 1;
+				GpioDataRegs.GPASET.bit.GPIO11 		= 1;
+				GpioDataRegs.GPBCLEAR.bit.GPIO34 	= 1;
+				GpioDataRegs.GPBCLEAR.bit.GPIO41 	= 1;
+
+				ledState = 2;
+				break;
+			case 2:
+				// do stuff
+
+				GpioDataRegs.GPACLEAR.bit.GPIO9 	= 1;
+				GpioDataRegs.GPACLEAR.bit.GPIO11 	= 1;
+				GpioDataRegs.GPBSET.bit.GPIO34 		= 1;
+				GpioDataRegs.GPBCLEAR.bit.GPIO41 	= 1;
+				ledState = 3;
+				break;
+			case 3:
+				// do stuff
+
+				GpioDataRegs.GPACLEAR.bit.GPIO9 	= 1;
+				GpioDataRegs.GPACLEAR.bit.GPIO11 	= 1;
+				GpioDataRegs.GPBCLEAR.bit.GPIO34 	= 1;
+				GpioDataRegs.GPBSET.bit.GPIO41 		= 1;
+				ledState = 0;
+				break;
+			}
+	}
 }
 
 
@@ -181,18 +191,19 @@ void buttonPress(void){
 
 	state 	= GpioDataRegs.GPADAT.bit.GPIO17;
 
-	if( state == 1 ){
+	if( state == 0 ){
 		// Button is held down
-		//Task_setPri(ledTask, -1);				// disable LED toggle task
+		Task_setPri(ledTask, -1);				// disable LED toggle task
 
-		GpioDataRegs.GPADAT.bit.GPIO9 	= 1;
-		GpioDataRegs.GPADAT.bit.GPIO11 	= 1;
-		GpioDataRegs.GPBDAT.bit.GPIO34 	= 1;
-	} else if( state == 0 ){
+		GpioDataRegs.GPASET.bit.GPIO9 	= 1;
+		GpioDataRegs.GPASET.bit.GPIO11 	= 1;
+		GpioDataRegs.GPBSET.bit.GPIO34 	= 1;
+		GpioDataRegs.GPBSET.bit.GPIO41 	= 1;
+
+	} else if( state == 1 ){
 		// Button is released
-		//Task_setPri(ledTask, 1);				// Re-enable LED toggle task
-		// do nothing
-		GpioDataRegs.GPADAT.bit.GPIO9 	= 0;
+		Task_setPri(ledTask, 1);				// Re-enable LED toggle task
+
 	}
 
 }
